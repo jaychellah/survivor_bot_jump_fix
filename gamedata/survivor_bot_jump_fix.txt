@@ -1,0 +1,102 @@
+"Games"
+{
+	"left4dead"
+	{
+		"Offsets"
+		{
+			// Vtable indices
+			"ILocomotion::ClimbUpToLedge"
+			{
+				"linux"		"42"
+				"windows"	"41"
+			}
+
+			"ILocomotion::Jump"
+			{
+				"linux"		"44"
+				"windows"	"43"
+			}
+
+			"INextBot::GetLocomotionInterface"
+			{
+				"linux"		"43"
+				"windows"	"42"
+			}
+
+			"NextBotPlayer<CTerrorPlayer>::MyNextBotPointer"
+			{
+				"linux"		"72"
+				"windows"	"71"
+			}
+
+			// Offsets
+			"PlayerLocomotion::m_isClimbingUpToLedge"
+			{
+				"linux"		"116"
+				"windows"	"116"
+			}
+
+			"PlayerLocomotion::m_landingGoal"
+			{
+				"linux"		"120"
+				"windows"	"120"
+			}
+
+			"PlayerLocomotion::m_hasLeftTheGround"
+			{
+				"linux"		"132"
+				"windows"	"132"
+			}
+		}
+	}
+
+	"left4dead2"
+	{
+		"Offsets"
+		{
+			// Vtable indices
+			"ILocomotion::ClimbUpToLedge"
+			{
+				"linux"		"47"
+				"windows"	"46"
+			}
+
+			"ILocomotion::Jump"
+			{
+				"linux"		"49"
+				"windows"	"48"
+			}
+
+			"INextBot::GetLocomotionInterface"
+			{
+				"linux"		"48"
+				"windows"	"47"
+			}
+
+			"NextBotPlayer<CTerrorPlayer>::MyNextBotPointer"
+			{
+				"linux"		"82"
+				"windows"	"81"
+			}
+
+			// Offsets
+			"PlayerLocomotion::m_isClimbingUpToLedge"
+			{
+				"linux"		"128"
+				"windows"	"128"
+			}
+
+			"PlayerLocomotion::m_landingGoal"
+			{
+				"linux"		"132"
+				"windows"	"132"
+			}
+
+			"PlayerLocomotion::m_hasLeftTheGround"
+			{
+				"linux"		"144"
+				"windows"	"144"
+			}
+		}
+	}
+}
