@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <survivor_bot_blockers_fix>
 
 #define REQUIRE_EXTENSIONS
 #include <dhooks>
@@ -15,8 +16,10 @@ enum struct PlayerLocomotionData
 PlayerLocomotionData g_PlayerLocomotionData;
 
 DynamicHook hDHook_ILocomotion_ClimbUpToLedge = null;
+DynamicHook hDHook_IBody_GetSolidMask = null;
 
 Handle g_hSDKCall_INextBot_GetLocomotionInterface = null;
+Handle g_hSDKCall_INextBot_GetBodyInterface = null;
 Handle g_hSDKCall_NextBotPlayer_CTerrorPlayer_MyNextBotPointer = null;
 Handle g_hSDKCall_ILocomotion_Jump = null;
 
@@ -33,6 +36,19 @@ Address NextBotPlayer_CTerrorPlayer_MyNextBotPointer( const int iClient )
 Address INextBot_GetLocomotionInterface( const Address adrThis )
 {
 	return SDKCall( g_hSDKCall_INextBot_GetLocomotionInterface, adrThis );
+}
+
+Address INextBot_GetBodyInterface( const Address adrThis )
+{
+	return SDKCall( g_hSDKCall_INextBot_GetBodyInterface, adrThis );
+}
+
+public MRESReturn DHook_PlayerBody_GetSolidMask_Post( int nThis, DHookReturn hReturn )
+{
+	DHookSetReturn( hReturn, hReturn.Value | CONTENTS_TEAM1 );
+
+	// Don't call real function twice
+	return MRES_Supercede;
 }
 
 // We're fixing this issue by rewriting this function body without calling IsClimbPossible.
@@ -68,6 +84,7 @@ public void OnClientPutInServer( int iClient )
 		Address adrNextBot = NextBotPlayer_CTerrorPlayer_MyNextBotPointer( iClient );
 
 		hDHook_ILocomotion_ClimbUpToLedge.HookRaw( Hook_Pre, INextBot_GetLocomotionInterface( adrNextBot ), DHook_PlayerLocomotion_ClimbUpToLedge );
+		hDHook_IBody_GetSolidMask.HookRaw( Hook_Post, INextBot_GetBodyInterface( adrNextBot ), DHook_PlayerBody_GetSolidMask_Post );
 	}
 }
 
@@ -101,6 +118,9 @@ public void OnPluginStart()
 	int iVtbl_ILocomotion_ClimbUpToLedge;
 	GET_OFFSET_WRAPPER(iVtbl_ILocomotion_ClimbUpToLedge, "ILocomotion::ClimbUpToLedge")
 
+	int iVtbl_IBody_GetSolidMask;
+	GET_OFFSET_WRAPPER(iVtbl_IBody_GetSolidMask, "IBody::GetSolidMask")
+
 	GET_OFFSET_WRAPPER(g_PlayerLocomotionData.m_isClimbingUpToLedge, "PlayerLocomotion::m_isClimbingUpToLedge")
 	GET_OFFSET_WRAPPER(g_PlayerLocomotionData.m_landingGoal, "PlayerLocomotion::m_landingGoal")
 	GET_OFFSET_WRAPPER(g_PlayerLocomotionData.m_hasLeftTheGround, "PlayerLocomotion::m_hasLeftTheGround")
@@ -110,10 +130,17 @@ public void OnPluginStart()
 	hDHook_ILocomotion_ClimbUpToLedge.AddParam( HookParamType_VectorPtr );
 	hDHook_ILocomotion_ClimbUpToLedge.AddParam( HookParamType_CBaseEntity );
 
+	hDHook_IBody_GetSolidMask = new DynamicHook( iVtbl_IBody_GetSolidMask, HookType_Raw, ReturnType_Int, ThisPointer_Address );
+
 	StartPrepSDKCall( SDKCall_Raw );
 	PREP_SDK_VCALL_SET_FROM_CONF_WRAPPER("INextBot::GetLocomotionInterface")
 	PrepSDKCall_SetReturnInfo( SDKType_PlainOldData, SDKPass_Plain );
 	g_hSDKCall_INextBot_GetLocomotionInterface = EndPrepSDKCall();
+
+	StartPrepSDKCall( SDKCall_Raw );
+	PREP_SDK_VCALL_SET_FROM_CONF_WRAPPER("INextBot::GetBodyInterface")
+	PrepSDKCall_SetReturnInfo( SDKType_PlainOldData, SDKPass_Plain );
+	g_hSDKCall_INextBot_GetBodyInterface = EndPrepSDKCall();
 
 	StartPrepSDKCall( SDKCall_Player );
 	PREP_SDK_VCALL_SET_FROM_CONF_WRAPPER("NextBotPlayer<CTerrorPlayer>::MyNextBotPointer")
@@ -140,6 +167,6 @@ public Plugin myinfo =
 	name = "[L4D/2] Survivor Bot Jump Fix",
 	author = "Sir Jay",
 	description = "Fixes an issue where survivor bots were unable to jump on some ledges/props",
-	version = "1.0.0",
+	version = "1.1.0",
 	url = "https://github.com/jchellah/survivor_bot_jump_fix"
 };
